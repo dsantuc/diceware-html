@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diceware Passphrase Generator</title>
+<link rel="stylesheet" type="text/css" href="css/style.css"/>
+<script src="js/diceware.wordlist.js"></script>
+<script>
+function cryptoSupported () {
+    return (window.crypto && window.Uint32Array) ? true : false;
+}
+
+function realRandom () {
+    var arr = new Uint32Array(1);
+    window.crypto.getRandomValues(arr);
+    return arr[0]/(0xffffffff + 1);
+}
+var rnd = cryptoSupported() ? realRandom : Math.random;
+
+function dieRoll () {
+    return Math.floor(rnd()*6)+1;
+}
+
+function dicewareRoll () {
+    var numbers = [];
+    for (var i=1; i<=5; ++i) {
+        numbers.push(dieRoll()+"");
+    }
+
+    return numbers.join("");
+}
+
+function getPassphrase (length) {
+    var words = [];
+    for (var i=1; i<=length; ++i) {
+        words.push(wordlist[dicewareRoll()]);
+    }
+
+    return words.join(" ");    
+}
+
+function getStrengthDescription (length) {
+    var descriptions = [
+        "(Not recommended.) Breakable by ~1,000 PCs equipped with high-end graphics processors, e.g. a criminal gang's botnet.",
+        "(Minimum recommended length.) May be breakable by an organization with a very large budget, such as a large country's security agency.",
+        "Unbreakable with any known technology, but may be within the range of large organizations by around 2030.",
+        "Should be completely secure through 2050."
+    ];
+
+    if(length < 5 || isNaN(length)) {
+        length = 5;
+    }
+    else if (length > 8) {
+        length = 8;
+    }
+    return descriptions[length % 5];
+}
+
+function getLength () {
+    return parseInt(document.getElementById("length").value);
+}
+
+function updateStrengthDescription () {
+    var length = getLength();
+    document.getElementById("strength").textContent = getStrengthDescription(length);
+}
+
+</script>
+</head>
+<body>
+<h1>Diceware Passphrase Generator</h1>
+<noscript>
+<p>The passphrase generator requires JavaScript.</p>
+</noscript>
+<div class="js hidden">
+<div id="warning" class="hidden">
+    <p>Your browser doesn't seem to support the latest cryptography API. You can still generate a passphrase using the older API, but it won't be considered "cryptographically secure".</p>
+</div>
+<div id="main">
+<p><label>Length: <input id="length" type="number" min="5" max="8" value="6"/></label> <button id="button">Generate Passphrase</button></p>
+<p id="strength"></p>
+<p id="passphrase">Your passphrase will appear here.</p>
+<p>(Strength descriptions come from the <a href="http://world.std.com/~reinhold/dicewarefaq.html#howlong" target="_blank">Diceware FAQ.</a>)</p>
+</div>
+</div>
+<script>
+document.querySelector(".js.hidden").classList.remove("hidden");  
+if (!cryptoSupported()) {
+    document.getElementById("warning").classList.remove("hidden");
+}
+document.getElementById("button").addEventListener("click", function () {
+    var length = getLength();
+    document.getElementById("passphrase").textContent = getPassphrase(length);
+});
+
+document.getElementById("length").addEventListener("change", updateStrengthDescription);
+
+updateStrengthDescription();
+
+</script>
+</body>
+</html>

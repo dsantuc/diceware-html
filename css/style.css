@@ -1,0 +1,18 @@
+.hidden {
+	display: none;
+}
+
+#passphrase {
+	background-color: #fff9c4;
+	border: 1px solid black;
+	padding: 1em; 
+	width: 50%;
+	min-width: 50%;
+	font-family: monospace;
+}
+
+#warning {
+	background-color: #fee;
+	border: 1px solid red;
+	padding: 1em; 
+}
